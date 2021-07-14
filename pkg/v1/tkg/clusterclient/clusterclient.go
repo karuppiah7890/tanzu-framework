@@ -53,6 +53,7 @@ import (
 	crtclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
+	configv1alpha1 "github.com/vmware-tanzu/tanzu-framework/apis/config/v1alpha1"
 	runv1alpha1 "github.com/vmware-tanzu/tanzu-framework/apis/run/v1alpha1"
 	tmcv1alpha1 "github.com/vmware-tanzu/tanzu-framework/pkg/v1/tkg/api/tmc/v1alpha1"
 	azureclient "github.com/vmware-tanzu/tanzu-framework/pkg/v1/tkg/azure"
@@ -277,6 +278,8 @@ type Client interface {
 	ActivateTanzuKubernetesReleases(tkrName string) error
 	// DeactivateTanzuKubernetesReleases deactivates TanzuKubernetesRelease
 	DeactivateTanzuKubernetesReleases(tkrName string) error
+	// GetFeatures returns Feature resources
+	GetFeatures(clusterName string) ([]configv1alpha1.Feature, error)
 }
 
 // PollOptions is options for polling
@@ -889,6 +892,17 @@ func (c *client) GetKubernetesVersion() (string, error) {
 	return versionInfo.GitVersion, nil
 }
 
+func (c *client) GetFeatures(clusterName string) ([]configv1alpha1.Feature, error) {
+	features := &configv1alpha1.FeatureList{}
+	if err := c.GetResourceList(features, clusterName, "", nil, nil); err != nil {
+		return features.Items, err
+	}
+	systemGate := &configv1alpha1.FeatureGate{}
+	if err := c.GetResource(systemGate, "tkg-system", "", nil, nil); err != nil {
+		return features, err
+	}
+	fmt.Printf("systemGate: ^v", systemGate)
+}
 func (c *client) PatchClusterObjectWithOptionalMetadata(clusterName, namespace, metadataKey string, metadata map[string]string) (string, error) {
 	if len(metadata) == 0 {
 		return "", nil

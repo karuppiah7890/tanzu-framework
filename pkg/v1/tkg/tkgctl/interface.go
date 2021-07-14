@@ -73,4 +73,6 @@ type TKGClient interface {
 	ActivateTanzuKubernetesReleases(tkrName string) error
 	// DeactivateTanzuKubernetesReleases deactivates TanzuKubernetesRelease
 	DeactivateTanzuKubernetesReleases(tkrName string) error
+	// GetClusters returns list of cluster
+	GetFeatures(options ListTKGFeaturesOptions) ([]client.ClusterInfo, error)
 }
