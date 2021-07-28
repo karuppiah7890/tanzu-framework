@@ -194,12 +194,14 @@ version: ## Show version
 
 .PHONY: ensure-pinniped-repo
 ensure-pinniped-repo:
+	@echo "ensure-pinniped-repo make target"
 	@rm -rf pinniped
 	@mkdir -p pinniped
 	@GIT_TERMINAL_PROMPT=0 git clone -q --depth 1 --branch $(PINNIPED_GIT_COMMIT) ${PINNIPED_GIT_REPOSITORY} pinniped > ${NUL} 2>&1
 
 .PHONY: prep-build-cli
 prep-build-cli: ensure-pinniped-repo
+	@echo "prep-build-cli make target"
 	$(GO) mod download
 	$(GO) mod tidy
 	EMBED_PROVIDERS_TAG=embedproviders
@@ -225,15 +227,18 @@ RELEASE_JOBS := $(addprefix release-,${ENVS})
 
 .PHONY: build-cli
 build-cli: build-plugin-admin ${CLI_JOBS} ## Build Tanzu CLI
+	@echo "build-cli make target"
 	@rm -rf pinniped
 
 .PHONY: build-plugin-admin
 build-plugin-admin:
+	@echo "build-plugin-admin make target"
 	@echo build version: $(BUILD_VERSION)
 	$(GO) run ./cmd/cli/plugin-admin/builder/main.go cli compile $(addprefix --target ,$(subst -,_,${ENVS})) --version $(BUILD_VERSION) --ldflags "$(LD_FLAGS)" --tags "${BUILD_TAGS}" --path ./cmd/cli/plugin-admin --artifacts artifacts-admin/${GOHOSTOS}/${GOHOSTARCH}/cli
 
 .PHONY: build-cli-%
 build-cli-%: prep-build-cli
+	@echo "build-cli-% $* make target"
 	$(eval ARCH = $(word 2,$(subst -, ,$*)))
 	$(eval OS = $(word 1,$(subst -, ,$*)))
 
@@ -280,6 +285,7 @@ build-cli-mocks: ## Build Tanzu CLI mocks
 
 .PHONY: install-cli
 install-cli: ## Install Tanzu CLI
+	@echo "install-cli make target"
 	$(GO) install -ldflags "$(LD_FLAGS)" ./cmd/cli/tanzu
 
 # Note: Invoking this target will update the unstableVersionSelector config
@@ -287,6 +293,7 @@ install-cli: ## Install Tanzu CLI
 # override if necessary.
 .PHONY: install-cli-plugins
 install-cli-plugins: set-unstable-versions  ## Install Tanzu CLI plugins
+	@echo "install-cli-plugins make target"
 	TANZU_CLI_NO_INIT=true $(GO) run -ldflags "$(LD_FLAGS)" ./cmd/cli/tanzu/main.go \
     		plugin install all --local $(ARTIFACTS_DIR)/$(GOHOSTOS)/$(GOHOSTARCH)/cli
 	TANZU_CLI_NO_INIT=true $(GO) run -ldflags "$(LD_FLAGS)" ./cmd/cli/tanzu/main.go \
@@ -296,6 +303,7 @@ install-cli-plugins: set-unstable-versions  ## Install Tanzu CLI plugins
 
 .PHONY: set-unstable-versions
 set-unstable-versions:  ## Configures the unstable versions
+	@echo "set-unstable-versions make target"
 	TANZU_CLI_NO_INIT=true $(GO) run -ldflags "$(LD_FLAGS)" ./cmd/cli/tanzu/main.go config set unstable-versions $(TANZU_PLUGIN_UNSTABLE_VERSIONS)
 
 .PHONY: build-install-cli-all ## Build and install the CLI plugins
@@ -372,10 +380,12 @@ verify: ## Run all verification scripts
 
 .PHONY: clean-catalog-cache
 clean-catalog-cache: ## Cleans catalog cache
+	@echo "clean-catalog-cache make target"
 	@rm -rf ${XDG_CACHE_HOME}/tanzu/*
 
 .PHONY: clean-cli-plugins
 clean-cli-plugins: ## Remove Tanzu CLI plugins
+	@echo "clean-catalog-cache make target"
 	- rm -rf ${XDG_DATA_HOME}/tanzu-cli/*
 
 ## --------------------------------------
