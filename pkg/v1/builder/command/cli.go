@@ -328,7 +328,7 @@ func buildPlugin(path string, arch cli.Arch, id string) (plugin, error) {
 	var desc cliv1alpha1.PluginDescriptor
 	err = json.Unmarshal(b, &desc)
 	if err != nil {
-		log.Errorf("%s - error unmarshalling plugin descriptor: %v", id, err)
+		log.Errorf("%s - error unmarshalling plugin descriptor: %v . Plugin descriptor - %v", id, err, string(b))
 		return plugin{}, err
 	}
 
